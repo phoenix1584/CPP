@@ -1,5 +1,5 @@
 TARGETS =  $(patsubst %.cc,%,$(wildcard *.cc))
-CPPFLAGS += -std=c++1z -Wall
+CPPFLAGS += -std=c++1z -Wall -DCONST_NUM=6
 
 program_INCLUDE_DIRS :=
 program_LIBRARY_DIRS :=
