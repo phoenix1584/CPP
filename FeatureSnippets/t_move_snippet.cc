@@ -130,9 +130,9 @@ int main()
 	std::cout << "-----------------------\n";
 	// Insert a new element into the second position of the vector.  
 	v.insert(v.begin() + 1, MemoryBlock(50));  
+	std::cout << "------Emplace--------------\n";
+	v.emplace_back(10);
 	std::cout << "-----------------------\n";
-	v.emplace_back(MemoryBlock(10));
-	std::cout << "-----------------------\n";
-	v.emplace_back(MemoryBlock(20));
+	v.emplace_back(20);
 	std::cout << "-----------------------\n";
 }  
