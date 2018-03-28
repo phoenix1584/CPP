@@ -37,14 +37,26 @@ auto add(T t, U u) -> decltype(t + u) // return type depends on template paramet
 {
     return t+u;
 }
- 
+
+template <typename X>
+class Test{
+    private:
+        X m_x;
+    public:
+        Test(const X& x)
+            :m_x(x)
+        {}
+        const auto Get() -> decltype( m_x ){
+            return m_x;
+        }
+};
+
 int main() 
 {
     int i = 33;
     decltype(i) j = i * 2;
  
-    std::cout << "i = " << i << ", "
-              << "j = " << j << '\n';
+    std::cout << "i = " << i << ", " << "j = " << j << '\n';
  
     auto f = [](int a, int b) -> int
     {
@@ -55,6 +67,11 @@ int main()
     i = f(2, 2);
     j = g(3, 3);
  
-    std::cout << "i = " << i << ", "
-              << "j = " << j << '\n';
+    std::cout << "i = " << i << ", " << "j = " << j << '\n';
+    Test<std::string> t("data");
+    std::cout << t.Get() << "\n";
+
+    Test<int> t1(42);
+    std::cout << t1.Get() << "\n";
+ 
 }
