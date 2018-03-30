@@ -28,25 +28,27 @@
 #include <algorithm>
 #include <functional>
 
-int main(){
-	{
-		int a = 1, b = 1, c = 1;
+auto func_print = []{ std::cout << "------------------\n"; };
 
-		auto m1 = [a, &b, &c]() mutable {
-			auto m2 = [a, b, &c]() mutable {
-				std::cout << a << b << c << '\n';
-				a = 4; b = 4; c = 4;
-			};
-			a = 3; b = 3; c = 3;
-			m2();
+void BasicLambda(){
+	func_print();
+	int a = 1, b = 1, c = 1;
+	auto m1 = [a, &b, &c]() mutable {
+		auto m2 = [a, b, &c]() mutable {
+			std::cout << a << b << c << '\n';
+			a = 4; b = 4; c = 4;
 		};
+		a = 3; b = 3; c = 3;
+		m2();
+	};
 
-		a = 2; b = 2; c = 2;
+	a = 2; b = 2; c = 2;
+	m1();                             // calls m2() and prints 123
+	std::cout << a << b << c << '\n'; // prints 234
+}
 
-		m1();                             // calls m2() and prints 123
-		std::cout << a << b << c << '\n'; // prints 234
-	}
-
+void AlgoLambda(){
+	func_print();
 	std::vector<int> c = {1, 2, 3, 4, 5, 6, 7};
 	int x = 5;
     c.erase(std::remove_if(c.begin(), c.end(), [x](int n) { return n < x; }), c.end());
@@ -64,4 +66,29 @@ int main(){
     // (this may incur unnecessary overhead)
     std::function<int(int)> func2 = [](int i) { return i + 4; };
     std::cout << "func2: " << func2(6) << '\n';
+}
+
+void ScopeLambda1(){
+	func_print();
+	auto x = 1;
+	auto l = [&x](){
+		auto y = 2;
+		x *= y;
+	};
+	l();
+	std::cout << "x : " << x << "\n"; 
+}
+
+void ScopeLambda2(){
+	func_print();
+	const auto n = 10;
+	auto l = [&n]()-> decltype(n){ return n * n ; };
+	std::cout << "n : " << l() << "\n";
+}
+
+int main(){
+	BasicLambda();
+	AlgoLambda();
+	ScopeLambda1();
+	ScopeLambda2();
 }
