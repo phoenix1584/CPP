@@ -14,7 +14,7 @@ LDFLAGS += $(foreach library,$(program_LIBRARIES),-l$(library))
 all: $(TARGETS)
 
 $(TARGETS): %: %.cc
-	    $(LINK.cc) -o $@ $< 
+	    $(LINK.cc) -o $@ $< -lpthread 
 
 clean:
 	$(RM) $(TARGETS) *.o
