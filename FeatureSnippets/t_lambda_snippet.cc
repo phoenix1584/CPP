@@ -27,6 +27,7 @@
 #include <iostream>
 #include <algorithm>
 #include <functional>
+#include <cmath>
 
 auto func_print = []{ std::cout << "------------------\n"; };
 
@@ -86,9 +87,18 @@ void ScopeLambda2(){
 	std::cout << "n : " << l() << "\n";
 }
 
+void ScopeLambda3(){
+    func_print();
+    const auto x = 20;
+    const auto y = 3;
+    auto l = [&]()-> decltype(x) { return std::pow(x,y);};
+	std::cout << "x : " << l() << "\n";
+}
+
 int main(){
 	BasicLambda();
 	AlgoLambda();
 	ScopeLambda1();
 	ScopeLambda2();
+	ScopeLambda3();
 }
