@@ -26,20 +26,22 @@
 #include <mutex>
 #include <condition_variable>
 #include <functional>
+#include <chrono>
 
 int global_data = 1;
 auto const divisor = 2;
 std::condition_variable cv;
 std::mutex m;
 
-void f_printer(std::function<bool()> condition){
+void f_printer(std::function<bool()> condition,const std::string& result_str){
     for(auto x = 0 ; x < CONST_NUM ; ++x){
         std::unique_lock<std::mutex> lk(m);
         cv.wait(lk,condition);
-        std::cout << ((global_data % divisor) ? "ODD" : "EVEN") << " : " << global_data << "\n";
+        std::cout << result_str << " : " << global_data << "\n";
         ++global_data;
+        std::this_thread::sleep_for(std::chrono::microseconds(100));
         lk.unlock();
-        cv.notify_all();
+        cv.notify_one();
     }
 }
 
@@ -55,9 +57,8 @@ int main() {
         LambdaTest(l);
     }
     
-    std::thread t_odd(f_printer,std::function<bool()>([](){return (global_data % divisor);}));
-    std::thread t_even(f_printer,std::function<bool()>([](){return (0 == global_data % divisor);}));
-    cv.notify_all();
+    std::thread t_odd(f_printer,std::function<bool()>([](){return (global_data % divisor);}),"ODD");
+    std::thread t_even(f_printer,std::function<bool()>([](){return (0 == global_data % divisor);}),"EVEN");
     t_odd.join();
     t_even.join();
     return 0;
