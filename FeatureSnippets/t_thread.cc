@@ -25,30 +25,18 @@
 #include <string>
 #include <mutex>
 #include <condition_variable>
+#include <functional>
 
 int global_data = 1;
 auto const divisor = 2;
-auto const range_start = 1; 
-auto const range_end = 20;
 std::condition_variable cv;
 std::mutex m;
 
-void f_odd_printer(const int start, const int end){
-    for(auto x = start ; x < end ; ++x){
+void f_printer(std::function<bool()> condition){
+    for(auto x = 0 ; x < CONST_NUM ; ++x){
         std::unique_lock<std::mutex> lk(m);
-        cv.wait(lk,[](){return (global_data % divisor);});
-        std::cout << "ODD :" << global_data << "\n";
-        ++global_data;
-        lk.unlock();
-        cv.notify_all();
-    }
-}
-
-void f_even_printer(const int start, const int end){
-    for(auto x = start ; x < end ; ++x){
-        std::unique_lock<std::mutex> lk(m);
-        cv.wait(lk,[](){return (0 == global_data % divisor);});
-        std::cout << "EVEN :" << global_data << "\n";
+        cv.wait(lk,condition);
+        std::cout << ((global_data % divisor) ? "ODD" : "EVEN") << " : " << global_data << "\n";
         ++global_data;
         lk.unlock();
         cv.notify_all();
@@ -56,18 +44,20 @@ void f_even_printer(const int start, const int end){
 }
 
 void LambdaTest(std::function<bool()> l){
-    std::cout << "it works!\n";
+    l();
 }
 
 int main() {
-    unsigned int n = std::thread::hardware_concurrency();
-    std::cout << n << " concurrent threads are supported.\n";
-
-    std::thread t_odd(f_odd_printer,range_start,range_end);
-    std::thread t_even(f_even_printer,range_start,range_end);
+    {
+        unsigned int n = std::thread::hardware_concurrency();
+        std::cout << n << " Concurrent threads are supported.\n";
+        std::function<bool()> l = [](){ std::cout << "it works.\n======================================\n"; return true; };
+        LambdaTest(l);
+    }
     
+    std::thread t_odd(f_printer,std::function<bool()>([](){return (global_data % divisor);}));
+    std::thread t_even(f_printer,std::function<bool()>([](){return (0 == global_data % divisor);}));
     cv.notify_all();
-    
     t_odd.join();
     t_even.join();
     return 0;
