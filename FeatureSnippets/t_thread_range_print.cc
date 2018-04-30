@@ -28,28 +28,37 @@
 #include <functional>
 #include <chrono>
 
-int global_data = 1;
+int global_data = 0;
 std::condition_variable cv;
 std::mutex m;
 
-void f_printer(std::function<bool()> condition,std::function<bool()> range){
-    std::unique_lock<std::mutex> lk(m);
-    cv.wait(lk,condition);
-    while(range){
-        std::cout << global_data << "\n";
-        ++global_data;
+
+void f_printer(int start,int end){
+    bool exit = false;
+    while(!exit){
+        std::unique_lock<std::mutex> lk(m);
+        cv.wait(lk,[](){return global_data >= 0; });
+        if(global_data == start-1 ){ // Condition , can be made dynamic by passing as std::function.
+            std::cout << "==== START =====\n"; // Task , can be dynamic as well.
+            for(auto i = start ; i < end + 1 ; ++i){
+                std::cout << i << "\n";
+                ++global_data;
+            }
+            std::cout << "==== END =====\n";
+            exit = true;
+        }
+        lk.unlock();
+        cv.notify_all();
     }
-    lk.unlock();
-    cv.notify_all();
 }
 
 int main() {
-    std::thread t1(f_printer,std::function<bool()>([](){return (global_data > 0);}),std::function<bool()>([](){return (global_data <= 20);}));
-    std::thread t2(f_printer,std::function<bool()>([](){return (global_data > 20);}),std::function<bool()>([](){return (global_data <= 60);}));
-    std::thread t3(f_printer,std::function<bool()>([](){return (global_data > 60);}),std::function<bool()>([](){return (global_data <= 100);}));
-    t1.join();
-    t2.join();
+    std::thread t3(f_printer,61,100);
+    std::thread t2(f_printer,21,60);
+    std::thread t1(f_printer,1,20);
     t3.join();
+    t2.join();
+    t1.join();
     return 0;
 }
 

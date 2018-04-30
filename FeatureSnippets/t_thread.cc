@@ -63,6 +63,3 @@ int main() {
     t_even.join();
     return 0;
 }
-
-
-
