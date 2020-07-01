@@ -1,5 +1,5 @@
 TARGETS =  $(patsubst %.cc,%,$(wildcard *.cc))
-CPPFLAGS += -std=c++1z -Wall -DCONST_NUM=6 -g -fconcepts
+CPPFLAGS += -std=c++20 -Wall -g
 
 program_INCLUDE_DIRS :=
 program_LIBRARY_DIRS :=
@@ -14,7 +14,12 @@ LDFLAGS += $(foreach library,$(program_LIBRARIES),-l$(library))
 all: $(TARGETS)
 
 $(TARGETS): %: %.cc
-	    $(LINK.cc) -o $@.out $< -lpthread 
+	    $(LINK.cc) -o $@ $< -lpthread 
 
 clean:
-	$(RM) *.out *.o
+	$(RM) $(TARGETS) *.o *.pcm math
+
+modules:
+	clang++ -std=c++20 -fmodules-ts --precompile math.cppm -o math.pcm                   
+	clang++ -std=c++20 -fmodules-ts -c math.pcm -o math.o                                
+	clang++ -std=c++20 -fmodules-ts -fprebuilt-module-path=. math.o t_math.cc -o math    
